@@ -1,0 +1,24 @@
+{
+  "name": "HTML-Ad-Starter-Kit",
+  "version": "1.0.0",
+  "description": "Source and build script",
+  "main": "gulpfile.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "github.com/hellorare",
+  "license": "ISC",
+  "devDependencies": {
+    "del": "*",
+    "gulp": "*",
+    "gulp-autoprefixer": "*",
+    "gulp-concat": "*",
+    "gulp-load-plugins": "*",
+    "gulp-replace": "*",
+    "gulp-uglify": "*",
+    "gulp-zip": "*",
+    "main-bower-files": "*",
+    "moment": "*",
+    "opn": "*"
+  }
+}
