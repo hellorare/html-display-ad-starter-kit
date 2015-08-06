@@ -1,6 +1,6 @@
 # HTML Display Ad Starter Kit
 
-A set of useful tools and a workflow for developing
+A set of useful tools and a workflow for developing HTML Ads
 
 - [Gulp](http://gulpjs.com/) for running tasks
 
@@ -14,3 +14,6 @@ A set of useful tools and a workflow for developing
 
 
 ## Todo
+
+-	[] This readme
+- [] TinyPNG integration

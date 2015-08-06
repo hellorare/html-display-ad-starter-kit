@@ -140,7 +140,7 @@ gulp.task('https', function (done) {
 //   Compile preview
 // --------------------------------------------------------------------------
 
-gulp.task('preview', function (done) {
+gulp.task('preview', ['clean', 'compile', 'compress-js', 'https'], function (done) {
 
 	var folders = getFolders(config.build);
 
@@ -231,13 +231,9 @@ gulp.task('deploy-staging', function() {
 //   Watch
 // --------------------------------------------------------------------------
 
-gulp.task('watch', function () {
+gulp.task('default', function () {
 
-	// gulp.watch( config.source + '/**/*.{jade,ejs,html,haml,sass,scss,less,styl,md,coffee}').on('change', reload);
-
-	// gulp.watch( config.source + '/**/*.{js,coffee}', ['bower-scripts'])
-
-	// gulp.watch( 'bower.json', ['bower-scripts' , 'bower-styles', 'bower-fonts']);
+	gulp.watch( '**/*.sketch', ['clean', 'sketch', 'minify-sketch']);
 
 });
 
@@ -246,11 +242,11 @@ gulp.task('watch', function () {
 //   Sketch compile
 // --------------------------------------------------------------------------
 
-gulp.task('default', [ 'clean', 'sketch', 'minify-sketch', 'watch' ]);
+gulp.task('sketch', [ 'clean', 'sketch', 'minify-sketch' ]);
 
 
 // --------------------------------------------------------------------------
 //   Build
 // --------------------------------------------------------------------------
 
-gulp.task('build', [ 'clean', 'compile', 'compress-js', 'https', 'zip' ]);
+gulp.task('build', [ 'clean', 'compile', 'compress-js', 'https', 'preview', 'zip' ]);
