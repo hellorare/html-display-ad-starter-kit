@@ -1,5 +1,6 @@
 build
-source/assets/styles
+common/build
+package
 
 ### OSX ###
 .DS_Store

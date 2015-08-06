@@ -7,11 +7,13 @@
 var gulp						= require('gulp'),
 		plugins					= require('gulp-load-plugins')(),
 		mainBowerFiles	= require('main-bower-files'),
+		browserSync			= require('browser-sync'),
 		reload					= browserSync.reload,
 		moment					= require('moment'),
 		opn							= require('opn'),
 		del							= require('del'),
-		fs							= require('fs');
+		fs							= require('fs'),
+		path 						= require('path');
 
 
 // --------------------------------------------------------------------------
@@ -19,9 +21,37 @@ var gulp						= require('gulp'),
 // --------------------------------------------------------------------------
 
 var config = {
-		source: './source',
-		build: 	'./build',
-		name:		'static-site'
+			source:   './source',
+			ads:  	  './ads',
+			common:   './common',
+			build: 	  './build',
+			packages: './package',
+			name:		  'Display Ads'
+}
+
+var svgConfig = {
+			mode : {
+				css : {
+					dest: '',
+					bust: false,
+					sprite: 'common.svg',
+					dimensions: '-size',
+					render: {
+						css: true
+					}
+				}
+			}
+};
+
+// --------------------------------------------------------------------------
+//   Get array of folders in a directory
+// --------------------------------------------------------------------------
+
+function getFolders(dir) {
+	return fs.readdirSync(dir)
+		.filter(function(file) {
+			return fs.statSync(path.join(dir, file)).isDirectory();
+		});
 }
 
 
@@ -31,7 +61,9 @@ var config = {
 
 gulp.task('clean', function () {
 	return del.sync([
-		config.build
+		config.build,
+		config.packages,
+		path.join(config.common, '/build')
 	]);
 });
 
@@ -50,12 +82,77 @@ gulp.task('browser-sync', function() {
 
 
 // --------------------------------------------------------------------------
+//   Compile Sketch Assets
+// --------------------------------------------------------------------------
+
+gulp.task('sketch', function() {
+
+	return gulp.src( path.join(config.common, '/**/*.sketch') )
+		.pipe( plugins.sketch({
+			export: 'artboards',
+			formats: 'svg'
+		}))
+		.pipe( plugins.svgSprite( svgConfig ) )
+		.pipe( gulp.dest( config.common + '/build/') );
+
+});
+
+
+// --------------------------------------------------------------------------
+//   Minify Compiled SVG
+// --------------------------------------------------------------------------
+
+gulp.task('minify-sketch', ['sketch'], function() {
+
+	return gulp.src( path.join(config.common, '/**/*.svg') )
+		.pipe( plugins.svgmin() )
+		.pipe( gulp.dest( config.common ) );
+
+});
+
+
+// --------------------------------------------------------------------------
 //   Compile
 // --------------------------------------------------------------------------
 
 gulp.task('compile', function (done) {
 
+	return gulp.src( path.join(config.ads, '/**/publish/web/**/*') )
+		.pipe( gulp.dest( config.build ) );
 
+});
+
+
+// --------------------------------------------------------------------------
+//   Enable HTTPS
+// --------------------------------------------------------------------------
+
+gulp.task('https', function (done) {
+
+	return gulp.src( path.join(config.build, '/**/*.html') )
+		.pipe( plugins.replace('src="http://', 'src="https://') )
+		.pipe( gulp.dest( config.build ) );
+
+});
+
+
+// --------------------------------------------------------------------------
+//   Zip Packages
+// --------------------------------------------------------------------------
+
+gulp.task('zip', ['clean', 'compile', 'compress-js', 'https'], function (done) {
+
+	var folders = getFolders(config.build);
+
+	var tasks = folders.map(function(folder) {
+
+		return gulp.src(path.join(config.build, folder, '/publish/web/**/*'))
+			.pipe( plugins.zip( config.name + ' - ' + folder + '.zip') )
+			.pipe( gulp.dest( path.join(config.packages, 'Revision - ' + moment().format('Do MMM YYYY, h.mma')) ));
+
+	});
+
+	return tasks;
 
 });
 
@@ -64,24 +161,11 @@ gulp.task('compile', function (done) {
 //   Compress JS
 // --------------------------------------------------------------------------
 
-gulp.task('compress', ['compile'], function () {
+gulp.task('compress-js', ['compile'], function () {
 
-	return gulp.src( config.build + '/**/*.js' )
+	return gulp.src( path.join(config.build, '/**/*.js') )
 		.pipe( plugins.uglify() )
 		.pipe( gulp.dest(config.build) );
-
-});
-
-
-// --------------------------------------------------------------------------
-//   Package
-// --------------------------------------------------------------------------
-
-gulp.task('package', ['compress'], function () {
-
-	return gulp.src( config.build + '/**/*' )
-		.pipe(plugins.zip(moment().format() + '.zip'))
-		.pipe(gulp.dest('./packages/'));
 
 });
 
@@ -101,7 +185,7 @@ gulp.task('deploy-staging', function() {
 		}
 	});
 
-	return gulp.src( config.build + '/**/*' )
+	return gulp.src( path.join(config.build, '/**/*') )
 		.pipe( gulpSSH.dest( '/var/www/' + config.name, { autoExit: true }))
 
 });
@@ -123,14 +207,14 @@ gulp.task('watch', function () {
 
 
 // --------------------------------------------------------------------------
-//   Default
+//   Sketch compile
 // --------------------------------------------------------------------------
 
-// gulp.task('default', [ 'serve', 'browser-sync', 'watch' ]);
+gulp.task('default', [ 'clean', 'sketch', 'minify-sketch', 'watch' ]);
 
 
 // --------------------------------------------------------------------------
 //   Build
 // --------------------------------------------------------------------------
 
-gulp.task('build', [ 'clean', 'compile', 'compress', 'package' ]);
+gulp.task('build', [ 'clean', 'compile', 'compress-js', 'https', 'zip' ]);
