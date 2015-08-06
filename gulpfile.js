@@ -13,19 +13,19 @@ var gulp						= require('gulp'),
 		opn							= require('opn'),
 		del							= require('del'),
 		fs							= require('fs'),
-		path 						= require('path');
-
+		path 						= require('path'),
+		merge 					= require('merge-stream');
 
 // --------------------------------------------------------------------------
 //   Configuration
 // --------------------------------------------------------------------------
 
 var config = {
-			source:   './source',
-			ads:  	  './ads',
+			ads:  	  './source',
 			common:   './common',
 			build: 	  './build',
 			packages: './package',
+			templates:'./templates',
 			name:		  'Display Ads'
 }
 
@@ -137,6 +137,42 @@ gulp.task('https', function (done) {
 
 
 // --------------------------------------------------------------------------
+//   Compile preview
+// --------------------------------------------------------------------------
+
+gulp.task('preview', function (done) {
+
+	var folders = getFolders(config.build);
+
+	var copy = folders.map(function(folder) {
+
+		return gulp.src(path.join(config.build, folder, '/publish/web/**/*'))
+			.pipe( gulp.dest( path.join(config.packages, 'Preview', folder) ));
+
+	});
+
+	var template = gulp.src( path.join(config.templates, 'list.hbs') )
+		.pipe( plugins.compileHandlebars(
+			{
+				folders: folders
+			},
+			{
+				helpers: {
+					sizes: function(str){
+									return str.replace(/(\d*)x(\d*)/g, 'width="$1px" height="$2px"');
+								}
+				}
+			}
+		))
+		.pipe( plugins.rename('index.html'))
+		.pipe( gulp.dest( path.join(config.packages, 'Preview') ));
+
+	return merge(copy, template);
+
+});
+
+
+// --------------------------------------------------------------------------
 //   Zip Packages
 // --------------------------------------------------------------------------
 
@@ -152,7 +188,7 @@ gulp.task('zip', ['clean', 'compile', 'compress-js', 'https'], function (done) {
 
 	});
 
-	return tasks;
+	return merge(tasks);
 
 });
 
