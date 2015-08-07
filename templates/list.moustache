@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>List of ads</title>
+</head>
+<body>
+
+{{#folders}}
+	<p>
+		<strong>{{.}}</strong>
+	</p>
+	<iframe frameborder="0" {{{sizes}}} src="{{.}}/{{.}}.html"></iframe>
+{{/folders}}
+
+</body>
+</html>

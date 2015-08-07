@@ -151,17 +151,13 @@ gulp.task('preview', ['clean', 'compile', 'compress-js', 'https'], function (don
 
 	});
 
-	var template = gulp.src( path.join(config.templates, 'list.hbs') )
-		.pipe( plugins.compileHandlebars(
+	var template = gulp.src( path.join(config.templates, 'list.moustache') )
+		.pipe( plugins.mustache(
 			{
-				folders: folders
-			},
-			{
-				helpers: {
-					sizes: function(str){
-									return str.replace(/(\d*)x(\d*)/g, 'width="$1px" height="$2px"');
-								}
-				}
+				folders: folders,
+				sizes: function() {
+								return this.replace(/(\d*)x(\d*)/g, 'width="$1px" height="$2px"');
+							}
 			}
 		))
 		.pipe( plugins.rename('index.html'))
