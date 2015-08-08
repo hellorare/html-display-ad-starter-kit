@@ -15,5 +15,5 @@ A set of useful tools and a workflow for developing HTML Ads
 
 ## Todo
 
--	[] This readme
-- [] TinyPNG integration
+-	[ ] This readme
+- [ ] TinyPNG integration

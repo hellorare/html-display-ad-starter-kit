@@ -32,12 +32,15 @@ var config = {
 var svgConfig = {
 			mode : {
 				css : {
+					example: {
+						template: './templates/sprite.moustache'
+					},
 					dest: '',
 					bust: false,
 					sprite: 'common.svg',
 					dimensions: '-size',
 					render: {
-						css: true
+						css: false
 					}
 				}
 			}
@@ -85,15 +88,17 @@ gulp.task('browser-sync', function() {
 //   Compile Sketch Assets
 // --------------------------------------------------------------------------
 
-gulp.task('sketch', function() {
+gulp.task('extract-svg', function() {
+
+	console.log(svgConfig);
 
 	return gulp.src( path.join(config.common, '/**/*.sketch') )
 		.pipe( plugins.sketch({
-			export: 'artboards',
+			export: 'slices',
 			formats: 'svg'
 		}))
 		.pipe( plugins.svgSprite( svgConfig ) )
-		.pipe( gulp.dest( config.common + '/build/') );
+		.pipe( gulp.dest( path.join( config.common, 'build') ));
 
 });
 
@@ -102,7 +107,7 @@ gulp.task('sketch', function() {
 //   Minify Compiled SVG
 // --------------------------------------------------------------------------
 
-gulp.task('minify-sketch', ['sketch'], function() {
+gulp.task('minify-svg', ['extract-svg'], function() {
 
 	return gulp.src( path.join(config.common, '/**/*.svg') )
 		.pipe( plugins.svgmin() )
@@ -229,7 +234,7 @@ gulp.task('deploy-staging', function() {
 
 gulp.task('default', function () {
 
-	gulp.watch( '**/*.sketch', ['clean', 'sketch', 'minify-sketch']);
+	gulp.watch( '**/*.sketch', ['clean', 'extract-svg', 'minify-svg']);
 
 });
 
@@ -238,7 +243,7 @@ gulp.task('default', function () {
 //   Sketch compile
 // --------------------------------------------------------------------------
 
-gulp.task('sketch', [ 'clean', 'sketch', 'minify-sketch' ]);
+gulp.task('sketch', [ 'clean', 'extract-svg', 'minify-svg' ]);
 
 
 // --------------------------------------------------------------------------
