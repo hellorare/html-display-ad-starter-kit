@@ -24,6 +24,7 @@
     "gulp-sketch": "*",
     "gulp-svg-sprite": "*",
     "gulp-svgmin": "*",
+    "gulp-tinypng-compress": "^1.1.8",
     "gulp-uglify": "*",
     "gulp-zip": "*",
     "main-bower-files": "*",

@@ -21,7 +21,7 @@ var gulp						= require('gulp'),
 // --------------------------------------------------------------------------
 
 var config = {
-			ads:  	  './source',
+			source:  	  './source',
 			common:   './common',
 			build: 	  './build',
 			packages: './package',
@@ -122,7 +122,7 @@ gulp.task('minify-svg', ['extract-svg'], function() {
 
 gulp.task('compile', function (done) {
 
-	return gulp.src( path.join(config.ads, '/**/publish/web/**/*') )
+	return gulp.src( path.join(config.source, '/**/publish/web/**/*') )
 		.pipe( gulp.dest( config.build ) );
 
 });
@@ -208,6 +208,23 @@ gulp.task('compress-js', ['compile'], function () {
 
 
 // --------------------------------------------------------------------------
+//   Compress Images
+// --------------------------------------------------------------------------
+
+gulp.task('smush', ['compile'], function () {
+
+	return gulp.src( path.join(config.source, '/**/*.png') )
+		.pipe( plugins.tinypngCompress({
+			key: 'K2H6n0IWE3_SjnxbVdIRYt6XkxpC41_f',
+			checkSigs: true,
+			sigFile: './.tinypng-sigs',
+			log: true
+		}) )
+		.pipe( gulp.dest(config.source) );
+
+});
+
+
 //   Deploy Staging
 // --------------------------------------------------------------------------
 
