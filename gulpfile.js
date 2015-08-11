@@ -132,7 +132,7 @@ gulp.task('compile', function (done) {
 //   Enable HTTPS
 // --------------------------------------------------------------------------
 
-gulp.task('https', function (done) {
+gulp.task('https', ['compile'], function (done) {
 
 	return gulp.src( path.join(config.build, '/**/*.html') )
 		.pipe( plugins.replace('src="http://', 'src="https://') )
