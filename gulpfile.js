@@ -145,7 +145,7 @@ gulp.task('https', ['compile'], function (done) {
 //   Compile preview
 // --------------------------------------------------------------------------
 
-gulp.task('preview', ['clean', 'compile', 'compress-js', 'https'], function (done) {
+gulp.task('preview', ['clean', 'compile', 'compress-js', 'https', 'trim-eas'], function (done) {
 
 	var folders = getFolders(config.build);
 
@@ -225,6 +225,20 @@ gulp.task('smush', ['compile'], function () {
 });
 
 
+// --------------------------------------------------------------------------
+//   Trim EAS Files
+// --------------------------------------------------------------------------
+
+gulp.task('trim-eas', ['compile'], function () {
+
+	return del.sync([
+		path.join(config.build, '/**/*.eas')
+	]);
+
+});
+
+
+// --------------------------------------------------------------------------
 //   Deploy Staging
 // --------------------------------------------------------------------------
 
@@ -267,4 +281,4 @@ gulp.task('sketch', [ 'clean', 'extract-svg', 'minify-svg' ]);
 //   Build
 // --------------------------------------------------------------------------
 
-gulp.task('build', [ 'clean', 'compile', 'compress-js', 'https', 'preview', 'zip' ]);
+gulp.task('build', [ 'clean', 'compile', 'compress-js', 'https', 'trim-eas', 'preview', 'zip' ]);
