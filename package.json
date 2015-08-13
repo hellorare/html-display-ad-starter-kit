@@ -22,6 +22,7 @@
     "gulp-rename": "^1.2.2",
     "gulp-replace": "*",
     "gulp-sketch": "*",
+    "gulp-ssh": "^0.5.1",
     "gulp-svg-sprite": "*",
     "gulp-svgmin": "*",
     "gulp-tinypng-compress": "^1.1.8",
@@ -30,6 +31,7 @@
     "main-bower-files": "*",
     "merge-stream": "^0.1.8",
     "moment": "*",
-    "opn": "*"
+    "opn": "*",
+    "slug": "^0.9.1"
   }
 }

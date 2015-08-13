@@ -14,7 +14,9 @@ var gulp						= require('gulp'),
 		del							= require('del'),
 		fs							= require('fs'),
 		path 						= require('path'),
-		merge 					= require('merge-stream');
+		merge 					= require('merge-stream'),
+		slug 						= require('slug');
+
 
 // --------------------------------------------------------------------------
 //   Configuration
@@ -45,6 +47,7 @@ var svgConfig = {
 				}
 			}
 };
+
 
 // --------------------------------------------------------------------------
 //   Get array of folders in a directory
@@ -253,8 +256,9 @@ gulp.task('deploy-staging', function() {
 		}
 	});
 
-	return gulp.src( path.join(config.build, '/**/*') )
-		.pipe( gulpSSH.dest( '/var/www/' + config.name, { autoExit: true }))
+	return gulp.src( path.join(config.packages, 'Preview/**/*') )
+		.pipe( gulpSSH.dest( path.join('/var/www/ads', slug(config.name)), { autoExit: true }))
+		.pipe( opn( path.join('http://staging.hellorare.com/ads/', slug(config.name)) ) )
 
 });
 
