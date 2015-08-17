@@ -64,3 +64,4 @@ source/styles/*.css
 
 ### Bower ###
 bower_components
+.tinypng-sigs

@@ -16,13 +16,16 @@ This is an all-in-one inline version of the CSS necessary to use the SVG sprite.
 -->
 
 <style type="text/css">
-{{#shapes}}{{#selector.shape}}.{{#classname}}{{expression}}{{/classname}}{{^last}},
-{{/last}}{{/selector.shape}} {
-	background: url({{{example}}}) {{position.relative.xy}} no-repeat;
-	width: {{width.outer}}px;
-	height: {{height.outer}}px;
+{{#sprites}}
+.icon-{{name}} {
+  display: block;
+  background-image: url({{{image}}});
+  background-position: {{px.offset_x}} {{px.offset_y}};
+  width: {{px.width}};
+  height: {{px.height}};
 }
-{{/shapes}}</style>
+{{/sprites}}
+</style>
 
 <!--
 ====================================================================================================
@@ -47,16 +50,16 @@ appropriately sized elements.
 
 			<ul>
 
-{{#shapes}}				<li title="{{name}}">
+{{#sprites}}				<li title="{{name}}">
 					<div class="icon-box">
 
 						<!-- {{name}} -->
-						<i class="{{#selector.shape}}{{#last}}{{#classname}}{{raw}}{{/classname}}{{/last}}{{/selector.shape}}">{{name}}</i>
+						<i class="icon-{{name}}">{{name}}</i>
 
 					</div>
 					<h2>{{name}}</h2>
 				</li>
-{{/shapes}}			</ul>
+{{/sprites}}			</ul>
 
 <!--
 ====================================================================================================
@@ -69,19 +72,18 @@ appropriately sized elements.
 		</header>
 		<section>
 			<pre>
-{{#shapes}}
+
+{{#sprites}}
 {
   id: '{{name}}',
   type: 'image',
-  rect: ['0', '0', '{{width.outer}}px', '{{height.outer}}px', 'auto', 'auto'],
-  fill: ["rgba(0,0,0,0)",im+"{{{example}}}",'{{position.relative.x}}%','{{position.relative.y}}%','auto','auto', 'no-repeat']
+  rect: ['0', '0', '{{px.width}}', '{{px.height}}', 'auto', 'auto'],
+  fill: ["rgba(0,0,0,0)",im+"{{{escaped_image}}}",'{{px.offset_x}}%','{{px.offset_y}}%','auto','auto', 'no-repeat']
 },
-{{/shapes}}
+{{/sprites}}
+
 			</pre>
 		</section>
 
-		<footer>
-			<p>Generated at {{date}} by <a href="https://github.com/jkphl/svg-sprite" target="_blank">svg-sprite</a>.</p>
-		</footer>
 	</body>
 </html>

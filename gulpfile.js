@@ -15,8 +15,8 @@ var gulp						= require('gulp'),
 		fs							= require('fs'),
 		path 						= require('path'),
 		merge 					= require('merge-stream'),
-		slug 						= require('slug');
-
+		slug 						= require('slug'),
+		glob 						= require('glob');
 
 // --------------------------------------------------------------------------
 //   Configuration
@@ -24,29 +24,12 @@ var gulp						= require('gulp'),
 
 var config = {
 			source:  	  './source',
-			common:   './common',
+			assets:   './assets',
 			build: 	  './build',
 			packages: './package',
 			templates:'./templates',
 			name:		  'Display Ads'
 }
-
-var svgConfig = {
-			mode : {
-				css : {
-					example: {
-						template: './templates/sprite.moustache'
-					},
-					dest: '',
-					bust: false,
-					sprite: 'common.svg',
-					dimensions: '-size',
-					render: {
-						css: false
-					}
-				}
-			}
-};
 
 
 // --------------------------------------------------------------------------
@@ -69,7 +52,7 @@ gulp.task('clean', function () {
 	return del.sync([
 		config.build,
 		config.packages,
-		path.join(config.common, '/build')
+		path.join(config.assets, '/temp')
 	]);
 });
 
@@ -91,30 +74,33 @@ gulp.task('browser-sync', function() {
 //   Compile Sketch Assets
 // --------------------------------------------------------------------------
 
-gulp.task('extract-svg', function() {
+gulp.task('extract-assets', function() {
 
-	console.log(svgConfig);
+	var sketches = glob.sync( path.join(config.assets, '/**/*.sketch') );
 
-	return gulp.src( path.join(config.common, '/**/*.sketch') )
-		.pipe( plugins.sketch({
-			export: 'slices',
-			formats: 'svg'
-		}))
-		.pipe( plugins.svgSprite( svgConfig ) )
-		.pipe( gulp.dest( path.join( config.common, 'build') ));
+	sketches.forEach( function (sketch) {
+		var basename = sketch.match(/\/(.*).sketch/);
+		basename = slug(basename[1]);
 
-});
-
-
-// --------------------------------------------------------------------------
-//   Minify Compiled SVG
-// --------------------------------------------------------------------------
-
-gulp.task('minify-svg', ['extract-svg'], function() {
-
-	return gulp.src( path.join(config.common, '/**/*.svg') )
-		.pipe( plugins.svgmin() )
-		.pipe( gulp.dest( config.common ) );
+		return gulp.src(sketch)
+			.pipe(plugins.sketch({
+				export: 'slices',
+				formats: 'png',
+				saveForWeb: true,
+				scales: 1.0,
+				trimmed: true
+			}))
+			.pipe( plugins.rename(function (path) {
+				path.basename = slug(path.basename);
+			}))
+			.pipe( gulp.dest(path.join( config.assets, 'temp', basename )) )
+			.pipe(plugins.spritesmith({
+				imgName: basename + '.png',
+				cssName: basename + '.html',
+				cssTemplate: path.join(config.templates, 'sprite.hbs')
+			}))
+			.pipe( gulp.dest( path.join( config.assets, 'build') ) )
+	});
 
 });
 
@@ -216,7 +202,7 @@ gulp.task('compress-js', ['compile'], function () {
 
 gulp.task('smush', ['compile'], function () {
 
-	return gulp.src( path.join(config.source, '/**/*.png') )
+	return gulp.src( [ path.join(config.source, '/**/*.png'), path.join(config.assets, 'build/**/*.png') ] )
 		.pipe( plugins.tinypngCompress({
 			key: 'K2H6n0IWE3_SjnxbVdIRYt6XkxpC41_f',
 			checkSigs: true,
@@ -269,7 +255,7 @@ gulp.task('deploy-staging', function() {
 
 gulp.task('default', function () {
 
-	gulp.watch( '**/*.sketch', ['clean', 'extract-svg', 'minify-svg']);
+	gulp.watch( '**/*.sketch', [ 'clean', 'extract-svg' ]);
 
 });
 
@@ -278,7 +264,7 @@ gulp.task('default', function () {
 //   Sketch compile
 // --------------------------------------------------------------------------
 
-gulp.task('sketch', [ 'clean', 'extract-svg', 'minify-svg' ]);
+gulp.task('sketch', [ 'clean', 'extract-svg' ]);
 
 
 // --------------------------------------------------------------------------
