@@ -200,16 +200,24 @@ gulp.task('compress-js', ['compile'], function () {
 //   Compress Images
 // --------------------------------------------------------------------------
 
-gulp.task('smush', ['compile'], function () {
+gulp.task('smush', ['extract-assets'], function () {
 
-	return gulp.src( [ path.join(config.source, '/**/*.png'), path.join(config.assets, 'build/**/*.png') ] )
-		.pipe( plugins.tinypngCompress({
-			key: 'K2H6n0IWE3_SjnxbVdIRYt6XkxpC41_f',
-			checkSigs: true,
-			sigFile: './.tinypng-sigs',
-			log: true
-		}) )
-		.pipe( gulp.dest(config.source) );
+	var tinypngConfig = {
+				key: 'K2H6n0IWE3_SjnxbVdIRYt6XkxpC41_f',
+				checkSigs: true,
+				sigFile: './.tinypng-sigs',
+				log: true
+			}
+
+	var source = gulp.src( path.join(config.source, '/**/*.png') )
+		.pipe( plugins.tinypngCompress( tinypngConfig) )
+		.pipe( gulp.dest( config.source ) );
+
+	var assets = gulp.src( path.join(config.assets, 'build/**/*.png') )
+		.pipe( plugins.tinypngCompress( tinypngConfig) )
+		.pipe( gulp.dest( path.join(config.assets, 'build') ) );
+
+	return merge(source, assets);
 
 });
 
@@ -255,7 +263,7 @@ gulp.task('deploy-staging', function() {
 
 gulp.task('default', function () {
 
-	gulp.watch( '**/*.sketch', [ 'clean', 'extract-svg' ]);
+	gulp.watch( '**/*.sketch', [ 'clean', 'extract-assets' ]);
 
 });
 
@@ -264,7 +272,7 @@ gulp.task('default', function () {
 //   Sketch compile
 // --------------------------------------------------------------------------
 
-gulp.task('sketch', [ 'clean', 'extract-svg' ]);
+gulp.task('sketch', [ 'clean', 'extract-assets', 'smush' ]);
 
 
 // --------------------------------------------------------------------------
