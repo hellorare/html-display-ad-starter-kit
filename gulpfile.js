@@ -1,6 +1,6 @@
 // ==========================================================================
 //
-//  Static Site Build Tools
+//  HTML Ad Build Tools
 //
 // ==========================================================================
 
@@ -88,7 +88,7 @@ gulp.task('extract-assets', function() {
 				formats: 'png',
 				saveForWeb: true,
 				scales: 1.0,
-				trimmed: true
+				trimmed: false
 			}))
 			.pipe( plugins.rename(function (path) {
 				path.basename = slug(path.basename);
