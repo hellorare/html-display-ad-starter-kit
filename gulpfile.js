@@ -51,8 +51,19 @@ function getFolders(dir) {
 gulp.task('clean', function () {
 	return del.sync([
 		config.build,
-		config.packages,
-		path.join(config.assets, '/temp')
+		config.packages
+	]);
+});
+
+
+// --------------------------------------------------------------------------
+//   Remove all sketch build files
+// --------------------------------------------------------------------------
+
+gulp.task('clean-sketch', function () {
+	return del.sync([
+		path.join(config.assets, 'build'),
+		path.join(config.assets, 'temp')
 	]);
 });
 
@@ -74,7 +85,7 @@ gulp.task('browser-sync', function() {
 //   Compile Sketch Assets
 // --------------------------------------------------------------------------
 
-gulp.task('extract-assets', function() {
+gulp.task('extract-assets', ['clean-sketch'], function() {
 
 	var sketches = glob.sync( path.join(config.assets, '/**/*.sketch') );
 
@@ -258,21 +269,10 @@ gulp.task('deploy-staging', function() {
 
 
 // --------------------------------------------------------------------------
-//   Watch
-// --------------------------------------------------------------------------
-
-gulp.task('default', function () {
-
-	gulp.watch( '**/*.sketch', [ 'clean', 'extract-assets' ]);
-
-});
-
-
-// --------------------------------------------------------------------------
 //   Sketch compile
 // --------------------------------------------------------------------------
 
-gulp.task('sketch', [ 'clean', 'extract-assets', 'smush' ]);
+gulp.task('sketch', [ 'clean-sketch', 'extract-assets' ]);
 
 
 // --------------------------------------------------------------------------
