@@ -7,8 +7,6 @@
 var gulp						= require('gulp'),
 		plugins					= require('gulp-load-plugins')(),
 		mainBowerFiles	= require('main-bower-files'),
-		browserSync			= require('browser-sync'),
-		reload					= browserSync.reload,
 		moment					= require('moment'),
 		opn							= require('opn'),
 		del							= require('del'),
@@ -17,6 +15,7 @@ var gulp						= require('gulp'),
 		merge 					= require('merge-stream'),
 		slug 						= require('slug'),
 		glob 						= require('glob');
+
 
 // --------------------------------------------------------------------------
 //   Configuration
@@ -28,7 +27,7 @@ var config = {
 			build: 	  './build',
 			packages: './package',
 			templates:'./templates',
-			name:		  'Display Ads'
+			name:		  'Display'
 }
 
 
@@ -65,19 +64,6 @@ gulp.task('clean-sketch', function () {
 		path.join(config.assets, 'build'),
 		path.join(config.assets, 'temp')
 	]);
-});
-
-
-// --------------------------------------------------------------------------
-//   Browser Sync
-// --------------------------------------------------------------------------
-
-gulp.task('browser-sync', function() {
-
-	return browserSync({
-		proxy: 'localhost:9000'
-	});
-
 });
 
 
@@ -211,24 +197,18 @@ gulp.task('compress-js', ['compile'], function () {
 //   Compress Images
 // --------------------------------------------------------------------------
 
-gulp.task('smush', ['extract-assets'], function () {
+gulp.task('smush', function () {
 
 	var tinypngConfig = {
 				key: 'K2H6n0IWE3_SjnxbVdIRYt6XkxpC41_f',
 				checkSigs: true,
-				sigFile: './.tinypng-sigs',
+				sigFile: './.smush-sigs',
 				log: true
 			}
 
-	var source = gulp.src( path.join(config.source, '/**/*.png') )
+	return gulp.src( path.join(config.source, '/**/*.{png,jpg}') )
 		.pipe( plugins.tinypngCompress( tinypngConfig) )
 		.pipe( gulp.dest( config.source ) );
-
-	var assets = gulp.src( path.join(config.assets, 'build/**/*.png') )
-		.pipe( plugins.tinypngCompress( tinypngConfig) )
-		.pipe( gulp.dest( path.join(config.assets, 'build') ) );
-
-	return merge(source, assets);
 
 });
 
@@ -250,7 +230,7 @@ gulp.task('trim-eas', ['compile'], function () {
 //   Deploy Staging
 // --------------------------------------------------------------------------
 
-gulp.task('deploy-staging', function() {
+gulp.task('deploy', function() {
 
 	var gulpSSH = new plugins.ssh({
 		ignoreErrors: false,
