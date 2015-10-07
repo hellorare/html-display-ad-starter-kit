@@ -26,6 +26,7 @@ var config = {
 			assets:   './assets',
 			build: 	  './build',
 			packages: './package',
+			deploy:  	  './.deploy',
 			templates:'./templates',
 			name:		  'Display'
 }
@@ -232,18 +233,30 @@ gulp.task('trim-eas', ['compile'], function () {
 
 gulp.task('deploy', function() {
 
-	var gulpSSH = new plugins.ssh({
-		ignoreErrors: false,
-		sshConfig: {
-			host: 'staging.hellorare.com',
-			username: 'root',
-			privateKey: fs.readFileSync(process.env.HOME + '/.ssh/id_rsa')
-		}
-	});
+	// var gulpSSH = new plugins.ssh({
+	// 	ignoreErrors: false,
+	// 	sshConfig: {
+	// 		host: 'staging.hellorare.com',
+	// 		username: 'root',
+	// 		privateKey: fs.readFileSync(process.env.HOME + '/.ssh/id_rsa')
+	// 	}
+	// });
+
+
 
 	return gulp.src( path.join(config.packages, 'Preview/**/*') )
-		.pipe( gulpSSH.dest( path.join('/var/www/ads', slug(config.name)), { autoExit: true }))
-		.pipe( opn( path.join('http://staging.hellorare.com/ads/', slug(config.name)) ) )
+		.pipe(plugins.changed(config.deploy))
+		.pipe(plugins.sftp({
+			host: 'staging.hellorare.com',
+			user: 'root',
+			remotePath: path.join('/var/www/ads', slug(config.name))
+		}))
+		.pipe( gulp.dest(config.deploy) );
+
+
+
+		// .pipe( gulpSSH.dest( path.join('/var/www/ads', slug(config.name)), { autoExit: true }))
+		// .pipe( opn( path.join('http://staging.hellorare.com/ads/', slug(config.name)) ) )
 
 });
 
